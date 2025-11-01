@@ -4,6 +4,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
+import { MotionProvider } from "@/components/site/motion-provider";
 
 import "./globals.css";
 
@@ -36,9 +37,11 @@ export default function RootLayout({
         <div className="flex min-h-screen flex-col">
           <SiteHeader />
           <main className="flex-1">
-            <div className="mx-auto w-full max-w-6xl px-6 py-16 md:px-10">
-              {children}
-            </div>
+            <MotionProvider>
+              <div className="mx-auto w-full max-w-6xl px-6 py-16 md:px-10">
+                {children}
+              </div>
+            </MotionProvider>
           </main>
           <SiteFooter />
         </div>

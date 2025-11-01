@@ -2,6 +2,9 @@
 
 import { motion } from "framer-motion";
 import { ArrowUpRight, Trophy } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+import { cn } from "@/lib/utils";
 
 import { ProjectLogo } from "@/components/site/icons/project-logo";
 import { fadeInUp, staggerChildren } from "@/lib/motion";
@@ -15,13 +18,19 @@ type Highlight = {
   glow?: string;
 };
 
+const HIGHLIGHT_LINKS: Record<string, string> = {
+  FinSightAI: "/projects/finsight",
+  BioQuery: "/projects/bioquery",
+  AdaptIQ: "/projects/adaptiq",
+};
+
 const HIGHLIGHTS: Highlight[] = [
   {
     title: "FinSightAI",
     description:
       "Fine-tuned financial copilots with QLoRA + PEFT delivering faster, more trustworthy insight loops for analysts.",
     metric: "45% performance lift · 60% faster inference",
-    logo: "/logos/finsight.jpg",
+    logo: "/logos/finsight.webp",
     glow: "bg-cyan-400/20",
   },
   {
@@ -29,7 +38,7 @@ const HIGHLIGHTS: Highlight[] = [
     description:
       "Cohere-powered knowledge engine turning 600+ NASA bioscience papers into an intuitive RAG interface.",
     metric: "Galactic Impact Award · NASA Space Apps 2025",
-    logo: "/logos/bioquery.jpg",
+    logo: "/logos/bioquery.webp",
     glow: "bg-purple-400/20",
   },
   {
@@ -37,7 +46,7 @@ const HIGHLIGHTS: Highlight[] = [
     description:
       "Adaptive learning platform pairing Gemini tutors with personalized scheduling to help 500+ learners progress.",
     metric: "Improved retention for every cohort",
-    logo: "/logos/adaptiq.jpg",
+    logo: "/logos/adaptiq.webp",
     glow: "bg-emerald-400/20",
   },
   {
@@ -51,6 +60,23 @@ const HIGHLIGHTS: Highlight[] = [
 ];
 
 export function ImpactHighlights() {
+  const router = useRouter();
+
+  const navigateWithTransition = (href: string) => {
+    if (typeof document !== "undefined") {
+      const docWithTransition = document as Document & {
+        startViewTransition?: (callback: () => void) => void;
+      };
+
+      if (docWithTransition.startViewTransition) {
+        docWithTransition.startViewTransition(() => router.push(href));
+        return;
+      }
+    }
+
+    router.push(href);
+  };
+
   return (
     <motion.section
       initial="hidden"
@@ -75,15 +101,42 @@ export function ImpactHighlights() {
         {HIGHLIGHTS.map((highlight) => {
           const Icon = highlight.icon ?? ArrowUpRight;
 
+          const href = HIGHLIGHT_LINKS[highlight.title];
+          const isClickable = Boolean(href);
+
           return (
             <motion.article
               key={highlight.title}
               variants={fadeInUp}
-              className="group relative overflow-hidden rounded-3xl border border-border/50 bg-slate-900/40 p-6 shadow-[0_30px_80px_-60px_rgba(56,189,248,0.7)] transition-transform hover:-translate-y-1 hover:border-primary/50"
+              onClick={
+                isClickable && href
+                  ? () => navigateWithTransition(href)
+                  : undefined
+              }
+              onKeyDown={
+                isClickable && href
+                  ? (event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        navigateWithTransition(href);
+                      }
+                    }
+                  : undefined
+              }
+              role={isClickable ? "link" : undefined}
+              aria-label={
+                isClickable ? `View ${highlight.title} project` : undefined
+              }
+              tabIndex={isClickable ? 0 : undefined}
+              className={cn(
+                "group relative overflow-hidden rounded-3xl border border-border/50 bg-slate-900/40 p-6 shadow-[0_30px_80px_-60px_rgba(56,189,248,0.7)] transition-transform hover:-translate-y-1 hover:border-primary/50",
+                isClickable &&
+                  "cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 hover:cursor-pointer"
+              )}
             >
               <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
                 <div
-                  className={`absolute right-[-4rem] top-1/2 h-48 w-48 -translate-y-1/2 rounded-full ${highlight.glow ?? "bg-primary/20"} blur-3xl`}
+                  className={`absolute -right-16 top-1/2 h-48 w-48 -translate-y-1/2 rounded-full ${highlight.glow ?? "bg-primary/20"} blur-3xl`}
                 />
               </div>
               <div className="relative flex flex-col gap-4">
